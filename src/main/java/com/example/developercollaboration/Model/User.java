@@ -1,5 +1,6 @@
 package com.example.developercollaboration.Model;
 
+import com.example.developercollaboration.Enums.RolesEnum;
 import lombok.*;
 
 import javax.persistence.*;
@@ -41,21 +42,17 @@ public class User {
             nullable = false
     )
     private String password;
+    private String ResetPasswordToken;
 
     private boolean isProfessional;
 
-    @ManyToMany(
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            }
-    )
-    @JoinTable(
 
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Collection<Role> roles = new ArrayList<>();
+   @ElementCollection(targetClass = RolesEnum.class)
+   @JoinTable(name = "tblroles", joinColumns = @JoinColumn(name = "user_id"))
+   @Column(name = "roles", nullable = false)
+   @Enumerated(EnumType.STRING)
+   private Collection<RolesEnum> roles;
+
 
     @Column(
     )
