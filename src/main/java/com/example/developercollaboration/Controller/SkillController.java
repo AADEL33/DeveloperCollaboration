@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/skill")
@@ -21,4 +23,13 @@ public class SkillController {
     public void deleteSkill(@RequestParam String skillName ) throws Exception {
         skillService.removeSkill(skillName);
     }
+    @GetMapping("/{id}")
+    public Optional<Skill> GetSkillByName(@PathVariable String id) throws Exception {
+        return skillService.getSkillbyName(id);
+    }
+    @GetMapping("/all")
+    public List<Skill> getAllSkills(){
+        return skillService.getSkills();
+    }
+
 }

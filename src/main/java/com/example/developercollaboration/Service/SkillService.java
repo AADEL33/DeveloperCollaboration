@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,5 +31,16 @@ public class SkillService {
         else{
              skillRepository.deleteById(SkillName);
         }
+    }
+    public List<Skill> getSkills(){
+         return skillRepository.findAll();
+    }
+    public Optional<Skill> getSkillbyName(String name)throws Exception{
+        if(!skillRepository.existsById(name)){
+            throw new Exception("Skill name not found");
+        }else{
+            return skillRepository.findById(name);
+        }
+
     }
 }
