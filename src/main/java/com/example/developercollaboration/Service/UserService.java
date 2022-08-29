@@ -5,7 +5,10 @@ import com.example.developercollaboration.Repositories.UserRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,13 +31,32 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
 
-    public User saveUser(User user){
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return  userRepo.save(user);
+    public User saveUser(User user)throws Exception{
+        if("" == user.getUsername()){
+            throw new Exception("Email must not be empty");
+        }
+        else if(userRepo.existsByUsername(user.getUsername())){
+            throw new Exception("Email taken");
+        } else{
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            return   userRepo.save(user);
+        }
+
+    }
+    public void deleteUser(String username)throws Exception{
+        if(!userRepo.existsByUsername(username)){
+            throw new Exception("user not found");
+
+        }
+        userRepo.deleteByUsername(username);
     }
 
-    public List<User> getUsers(){
-       return  userRepo.findAll();
+    public User UpdateUsername(String username){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        User user =userRepo.findByUsername((String) authentication.getPrincipal());
+        user.setUsername(username);
+        return user;
     }
 
     @Override
@@ -50,7 +72,7 @@ public class UserService implements UserDetailsService {
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
         user.getRoles().forEach(
                 role -> {
-                    authorities.add(new SimpleGrantedAuthority(role.getName()));
+                    authorities.add(new SimpleGrantedAuthority(role.toString()));
                 }
         );
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);

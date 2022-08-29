@@ -3,40 +3,38 @@ package com.example.developercollaboration.Controller;
 import com.example.developercollaboration.Model.User;
 import com.example.developercollaboration.Repositories.UserRepository;
 import com.example.developercollaboration.Service.UserService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.CurrentSecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-
+import javax.transaction.Transactional;
+import java.security.Principal;
 import java.util.List;
-import java.util.Objects;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
+@Transactional
 public class UserController {
     private final UserRepository userRepository;
     private final UserService userservice;
-
+    @CrossOrigin(origins = "http://localhost:3000")
    @PostMapping(path = "/create")
-    public ResponseEntity<User> createUser( @RequestBody User user) throws Exception {
-       if("" == user.getUsername()){
-           throw new Exception("Email must not be empty");
-       }
-       else if(userRepository.existsByUsername(user.getUsername())){
-           throw new Exception("Email taken");
-       } else{
-           return    ResponseEntity.ok().body(userservice.saveUser(user));
-       }
+    public User createUser( @RequestBody User user) throws Exception {
+      return userservice.saveUser(user);
 
    }
-   @GetMapping(path="/getUsers")
-    public List<User> getUsers(){
-       return userRepository.findAll();
+   @DeleteMapping(path="/deleteUser/{username}")
+   //@ResponseBody
+    public void deleteUser(@PathVariable(value = "username") String username)throws Exception{
+       userservice.deleteUser(username);
+   }
+   @PostMapping (path="/updateUsername")
+    public User updateusername(@RequestParam String username){
+      return userservice.UpdateUsername(username);
    }
 }
