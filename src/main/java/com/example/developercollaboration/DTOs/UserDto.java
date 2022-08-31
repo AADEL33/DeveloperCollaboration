@@ -1,5 +1,10 @@
 package com.example.developercollaboration.DTOs;
 
-public class UserDto {
+public record UserDto (
+
+){
+    void gg(){
+        System.out.println(65);
+    }
 
 }

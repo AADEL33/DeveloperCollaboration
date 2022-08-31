@@ -42,7 +42,8 @@ public class User {
             nullable = false
     )
     private String password;
-    private String ResetPasswordToken;
+
+    private String resetPasswordToken;
 
     private boolean isProfessional;
 
