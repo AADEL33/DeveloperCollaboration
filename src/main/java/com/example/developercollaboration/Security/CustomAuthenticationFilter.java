@@ -12,9 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -27,19 +25,12 @@ import java.util.stream.Collectors;
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
 
-    /*@Override
-    @Autowired
-    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
-        super.setAuthenticationManager(authenticationManager);
-    }*/
-
-
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
-        Map dataMap = null;
+        Map dataMap;
         String username = null;
-        String password = null;
+         String password = null;
 
         try {
             dataMap = new ObjectMapper().readValue(request.getInputStream(),Map.class);
@@ -61,7 +52,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication)  {
         User user = (User) authentication.getPrincipal();
 
         Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());

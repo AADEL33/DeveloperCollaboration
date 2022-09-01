@@ -55,9 +55,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                             = new ArrayList<>();
 
                     stream(roles).forEach(
-                            role -> {
-                                authorities.add(new SimpleGrantedAuthority(role));
-                            }
+                            role -> authorities.add(new SimpleGrantedAuthority(role))
                     );
 
                     UsernamePasswordAuthenticationToken authenticationToken
@@ -69,7 +67,6 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
                 } catch ( Exception exception ) {
                     log.error("Error logging in : {}", exception.getMessage());
-                    response.setHeader("error", exception.getMessage());
                     response.setHeader("Access-Control-Allow-Credentials", "Authorization");/**/
                     response.setStatus(FORBIDDEN.value());
                     Map<String, String> error = new HashMap<>();
