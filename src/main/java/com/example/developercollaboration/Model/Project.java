@@ -6,13 +6,13 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 @Entity
 @Table
 @AllArgsConstructor
 @NoArgsConstructor
-
 @Getter
 @Setter
 public class Project  {
@@ -21,7 +21,7 @@ public class Project  {
     @Column( nullable = false)
     private Long id;
     @ManyToOne
-    @JoinColumn(name ="user_id")
+    @JoinColumn(name ="creator_id")
     private User creator;
     @ManyToMany(fetch=FetchType.LAZY)@JoinTable(
             name="project_user",
@@ -29,6 +29,7 @@ public class Project  {
             inverseJoinColumns = {@JoinColumn(name="user_id")}
     )
    private List<User>  contributors=new ArrayList<>();
+    @Column(nullable = false)
    private String projectName;
     @ManyToMany(fetch=FetchType.LAZY)@JoinTable(
             name="project_skill",
@@ -36,9 +37,24 @@ public class Project  {
             inverseJoinColumns = {@JoinColumn(name="skill_id")}
     )
     private List<Skill>  requiredSkills=new ArrayList<>();
-
+    @Column(nullable = false)
     private String description;
     private ProjectStatus projectstatus;
     private String gtihubLink;
+    private int maxContributors;
+    @Column(columnDefinition = "boolean default true")
+    private Boolean isOpen=true;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Project project)) return false;
+        return Objects.equals(getId(), project.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
+    }
 
 }

@@ -4,12 +4,9 @@ import com.example.developercollaboration.Enums.RolesEnum;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
-import static javax.persistence.GenerationType.AUTO;
+
 
 @Entity
 @Table
@@ -20,10 +17,7 @@ import static javax.persistence.GenerationType.AUTO;
 @Setter
 public class User {
     @Id
-    @GeneratedValue(
-            strategy = AUTO
-    )
-    private Long Id;
+    private String username;
     @Column(
             nullable = false
     )
@@ -36,25 +30,17 @@ public class User {
     @Column(
             nullable = false
     )
-
-    private String username;
-    @Column(
-            nullable = false
-    )
     private String password;
 
     private String resetPasswordToken;
 
     private boolean isProfessional;
 
-
    @ElementCollection(targetClass = RolesEnum.class)
    @JoinTable(name = "tblroles", joinColumns = @JoinColumn(name = "user_id"))
    @Column(name = "roles", nullable = false)
    @Enumerated(EnumType.STRING)
    private Collection<RolesEnum> roles;
-
-
     @Column(
     )
     private Date dateOfBirth;
@@ -73,4 +59,16 @@ public class User {
     @Column(
     )
     private String githubLink;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User user)) return false;
+        return Objects.equals(getUsername(), user.getUsername());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getUsername());
+    }
 }

@@ -3,6 +3,7 @@ package com.example.developercollaboration.Model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table
@@ -24,4 +25,16 @@ public class Comment {
     private Project project;
     @Column(nullable = false)
     private String comment;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Comment comment)) return false;
+        return Objects.equals(getId(), comment.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
+    }
 }
