@@ -9,7 +9,4 @@ public class DeveloperCollaborationPlatformApplication {
     public static void main(String[] args) {
         SpringApplication.run(DeveloperCollaborationPlatformApplication.class, args);
     }
-
-
-
 }

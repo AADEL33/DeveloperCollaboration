@@ -18,6 +18,7 @@ import java.util.Optional;
 @Data
 public class SkillService {
     private final SkillRepository skillRepository;
+
     public Skill addSkill(Skill skill)throws Exception{
         if(skillRepository.existsById(String.valueOf(skill))){
             throw new Exception("skill already exists");
@@ -35,6 +36,7 @@ public class SkillService {
     public List<Skill> getSkills(){
          return skillRepository.findAll();
     }
+
     public Optional<Skill> getSkillbyName(String name)throws Exception{
         if(!skillRepository.existsById(name)){
             throw new Exception("Skill name not found");
@@ -42,5 +44,7 @@ public class SkillService {
             return skillRepository.findById(name);
         }
 
+
     }
+
 }
