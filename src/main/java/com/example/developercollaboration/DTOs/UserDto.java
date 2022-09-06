@@ -1,10 +1,12 @@
 package com.example.developercollaboration.DTOs;
 
-public record UserDto (
+import lombok.Data;
 
-){
-    void gg(){
-        System.out.println(65);
-    }
+import java.io.Serializable;
 
+@Data
+public class UserDto implements Serializable {
+    private final String username;
+    private final String firstname;
+    private final String lastname;
 }
