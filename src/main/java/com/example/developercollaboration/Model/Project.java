@@ -44,6 +44,8 @@ public class Project  {
     private int maxContributors;
     @Column(columnDefinition = "boolean default true")
     private Boolean isOpen=true;
+    @OneToMany(mappedBy="project",fetch = FetchType.LAZY)
+    private List<Comment>  comments;
 
     @Override
     public boolean equals(Object o) {
