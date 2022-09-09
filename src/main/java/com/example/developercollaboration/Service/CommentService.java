@@ -26,25 +26,25 @@ public class CommentService {
 
     public void addCommentToProject(String commentary, Long ProjectId) throws Exception {
 
-        Project project=projectService.findProjectById(ProjectId);
+        Optional<Project> project=projectService.findProjectById(ProjectId);
         Comment comment=new Comment();
-        comment.setProject(project);
+        comment.setProject(project.get());
         comment.setUser(userService.getCurrentUser());
         comment.setComment(commentary);
         commentRepository.save(comment);
-        project.getComments().add(comment);
+        project.get().getComments().add(comment);
     }
 
     public void deleteCommentFromProject(Long CommentId,Long ProjectId) throws Exception {
         if(!projectRepository.existsById(ProjectId)||!commentRepository.existsById(CommentId)){
             throw new Exception("Project or comment not found");
         }
-        Project project=projectService.findProjectById(ProjectId);
+        Optional<Project> project=projectService.findProjectById(ProjectId);
         Optional<Comment> comment=commentRepository.findById(CommentId);
-        if(!project.getComments().contains(comment.get()) || comment.get().getUser()!=userService.getCurrentUser()) {
+        if(!project.get().getComments().contains(comment.get()) || comment.get().getUser()!=userService.getCurrentUser()) {
             throw new Exception("this project does not contains this comment or maybe you do not own this comment");
         }
-        project.getComments().remove(comment.get());
+        project.get().getComments().remove(comment.get());
         commentRepository.deleteById(CommentId);
     }
 

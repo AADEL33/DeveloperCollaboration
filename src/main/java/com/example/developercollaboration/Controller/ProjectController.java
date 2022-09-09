@@ -20,7 +20,7 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @GetMapping("/findProjectByid")
-    public Project findProjectById(@RequestParam Long id) throws Exception {
+    public Optional<Project>  findProjectById(@RequestParam Long id) throws Exception {
         return projectService.findProjectById(id);
     }
 
@@ -59,7 +59,7 @@ public class ProjectController {
 
     @PostMapping("/addUserToProject")
     public Project addUserToProject(@RequestParam Long id) throws Exception {
-        return projectService.assignUserToProject(projectService.findProjectById(id));
+        return projectService.assignUserToProject(projectService.findProjectById(id).get());
     }
     @PostMapping("/addSkillstToProject")
     public void addSkillsToProject(@RequestParam Long projectId,@RequestParam List<String> skillIds) throws Exception {

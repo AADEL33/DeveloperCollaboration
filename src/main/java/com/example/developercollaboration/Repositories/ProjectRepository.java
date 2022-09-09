@@ -5,11 +5,13 @@ import org.springframework.stereotype.Repository;
 
 
 import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface ProjectRepository extends JpaRepository<Project,Long> {
     List<Project> findAllByIsOpenTrue();
     List<Project> findAllByIsOpenFalse();
-    Project findProjectById(Long id);
+    Optional<Project>  findProjectById(Long id);
 
  /*   @Query("select P from Project as P where containsAll (collect(P.requiredSkills),skills)")
     List<Project> findAllByReq(List<Skill>skills);*/

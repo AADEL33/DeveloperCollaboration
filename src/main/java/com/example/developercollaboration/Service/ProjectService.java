@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Data
@@ -29,7 +30,7 @@ public class ProjectService {
         projectRepository.save(project);
     }
 
-    public Project findProjectById(Long id) throws Exception {
+    public Optional<Project>  findProjectById(Long id) throws Exception {
         if (!projectRepository.existsById(id)) throw new Exception("No project Found with id" + id);
         return projectRepository.findProjectById(id);
     }
@@ -85,15 +86,15 @@ public class ProjectService {
     }
 
     public Project assignUserToProject(Project project) throws Exception {
-        User currentuser = userService.getCurrentUser();
+        User currentUser = userService.getCurrentUser();
         if (!project.getIsOpen()) {
             throw new Exception("Sorry you can not join this project, the limit number of contributors is already reached");
         }
 
-        if (project.getContributors().contains(userRepository.findByUsername(currentuser.getUsername())))
+        if (project.getContributors().contains(userRepository.findByUsername(currentUser.getUsername())))
             throw new Exception("you are already member");
         else {
-            project.getContributors().add(currentuser);
+            project.getContributors().add(currentUser);
             if (project.getContributors().size() == project.getMaxContributors()) project.setIsOpen(false);
             projectRepository.saveAndFlush(project);
             return project;
@@ -103,25 +104,25 @@ public class ProjectService {
     public void addSkillsToProject(Long projectId, List<String> skillIds) throws Exception {
 
         ArrayList<Skill> skills = new ArrayList<>();
-        skillIds.forEach(skillid -> {
+        skillIds.forEach(skillId -> {
             try {
-                skills.add(skillService.getSkillbyName(skillid).get());
+                skills.add(skillService.getSkillbyName(skillId).get());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
-        Project project = findProjectById(projectId);
-        project.getRequiredSkills().addAll(skills);
+        Optional<Project> project = findProjectById(projectId);
+        project.get().getRequiredSkills().addAll(skills);
     }
 
     public void retrieveUserFromProject(String username, Long projectId) throws Exception {
         User user = userRepository.findByUsername(username);
-        Project project = findProjectById(projectId);
-        if (!project.getContributors().contains(user)) {
+        Optional<Project> project = findProjectById(projectId);
+        if (!project.get().getContributors().contains(user)) {
             throw new Exception("The user" + user + " is not a member in " + project);
         } else {
-            project.getContributors().remove(user);
-            project.setIsOpen(true);
+            project.get().getContributors().remove(user);
+            project.get().setIsOpen(true);
         }
     }
 }
