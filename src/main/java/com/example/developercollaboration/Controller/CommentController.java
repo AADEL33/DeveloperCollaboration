@@ -1,11 +1,10 @@
 package com.example.developercollaboration.Controller;
 
-import com.example.developercollaboration.Model.Comment;
+import com.example.developercollaboration.DTOs.CommentDto;
 import com.example.developercollaboration.Service.CommentService;
 import com.example.developercollaboration.Service.UserService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.apache.el.lang.ELArithmetic;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +17,7 @@ public class CommentController {
     private final CommentService commentService;
     private final UserService userService;
     @GetMapping("/myComments")
-    public List<Comment> MyComments() throws Exception {
+    public List<CommentDto> MyComments() throws Exception {
        return  commentService.getMyCommentsOnProjects(userService.getCurrentUser());
     }
 

@@ -1,5 +1,6 @@
 package com.example.developercollaboration.Service;
 
+import com.example.developercollaboration.DTOs.CommentDto;
 import com.example.developercollaboration.Model.Comment;
 import com.example.developercollaboration.Model.Project;
 import com.example.developercollaboration.Model.User;
@@ -40,17 +41,18 @@ public class CommentService {
         }
         Project project=projectService.findProjectById(ProjectId);
         Optional<Comment> comment=commentRepository.findById(CommentId);
-        if(!project.getComments().contains(comment)) {
-            throw new Exception("this project does not contains this comment");
+        if(!project.getComments().contains(comment.get()) || comment.get().getUser()!=userService.getCurrentUser()) {
+            throw new Exception("this project does not contains this comment or maybe you do not own this comment");
         }
-        project.getComments().remove(comment);
+        project.getComments().remove(comment.get());
+        commentRepository.deleteById(CommentId);
     }
 
-    public List<Comment> getMyCommentsOnProjects(User user) throws Exception {
+    public List<CommentDto> getMyCommentsOnProjects(User user) throws Exception {
         if(commentRepository.count()==0){
             throw new Exception("No comment found");
         }
-        return commentRepository.findCommentsByUser(user);
+        return  commentRepository.findAllByUser(user);
     }
 
 
