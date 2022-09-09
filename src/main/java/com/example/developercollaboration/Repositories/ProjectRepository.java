@@ -13,8 +13,4 @@ public interface ProjectRepository extends JpaRepository<Project,Long> {
     List<Project> findAllByIsOpenFalse();
     Optional<Project>  findProjectById(Long id);
 
- /*   @Query("select P from Project as P where containsAll (collect(P.requiredSkills),skills)")
-    List<Project> findAllByReq(List<Skill>skills);*/
-
-
 }

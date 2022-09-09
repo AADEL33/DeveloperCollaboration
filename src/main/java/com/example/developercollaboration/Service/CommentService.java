@@ -26,7 +26,7 @@ public class CommentService {
 
     public void addCommentToProject(String commentary, Long ProjectId) throws Exception {
 
-        Optional<Project> project=projectService.findProjectById(ProjectId);
+        Optional<Project> project=projectRepository.findById(ProjectId);
         Comment comment=new Comment();
         comment.setProject(project.get());
         comment.setUser(userService.getCurrentUser());
@@ -39,7 +39,7 @@ public class CommentService {
         if(!projectRepository.existsById(ProjectId)||!commentRepository.existsById(CommentId)){
             throw new Exception("Project or comment not found");
         }
-        Optional<Project> project=projectService.findProjectById(ProjectId);
+        Optional<Project> project=projectRepository.findById(ProjectId);
         Optional<Comment> comment=commentRepository.findById(CommentId);
         if(!project.get().getComments().contains(comment.get()) || comment.get().getUser()!=userService.getCurrentUser()) {
             throw new Exception("this project does not contains this comment or maybe you do not own this comment");

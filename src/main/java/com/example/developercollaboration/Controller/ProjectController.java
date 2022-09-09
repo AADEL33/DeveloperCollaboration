@@ -1,5 +1,6 @@
 package com.example.developercollaboration.Controller;
 
+import com.example.developercollaboration.DTOs.ProjectDto;
 import com.example.developercollaboration.Model.Project;
 import com.example.developercollaboration.Model.Skill;
 import com.example.developercollaboration.Service.ProjectService;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,8 +20,8 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @GetMapping("/findProjectByid")
-    public Optional<Project>  findProjectById(@RequestParam Long id) throws Exception {
-        return projectService.findProjectById(id);
+    public Optional<ProjectDto>  findProjectById(@RequestParam Long id) throws Exception {
+        return projectService.findById(id);
     }
 
     @PostMapping("/add")
@@ -35,30 +35,30 @@ public class ProjectController {
     }
 
     @GetMapping("/openProjects")
-    public List<Project> findOpenProjects() throws Exception {
+    public List<ProjectDto> findOpenProjects() throws Exception {
        return projectService.findAllOpenProjects();
     }
 
     @GetMapping("/closedProjects")
-    public List<Project> findClosedProjects() throws Exception {
+    public List<ProjectDto> findClosedProjects() throws Exception {
         return projectService.findAllClosedProjects();
     }
     @GetMapping("/allProjects")
-    public List<Project> findAllProjects() throws Exception {
+    public List<ProjectDto> findAllProjects() throws Exception {
         return projectService.findAllProjects();
     }
 
     @GetMapping("/findByAllSkills")
-    public List<Project> findProjectsByMultipleSkills(@RequestBody ArrayList<Skill> skills) throws Exception {
+    public List<ProjectDto> findProjectsByMultipleSkills(@RequestBody ArrayList<Skill> skills) throws Exception {
         return projectService.findAllByRequiredSkillsContaining(skills);
     }
     @GetMapping("/findBySomeSkills")
-    public List<Project> findProjectsBySomeSkills(@RequestBody ArrayList<Skill> skills) throws Exception {
+    public List<ProjectDto> findProjectsBySomeSkills(@RequestBody ArrayList<Skill> skills) throws Exception {
         return projectService.findByAtLeastOneSkill(skills);
     }
 
     @PostMapping("/addUserToProject")
-    public Project addUserToProject(@RequestParam Long id) throws Exception {
+    public ProjectDto addUserToProject(@RequestParam Long id) throws Exception {
         return projectService.assignUserToProject(projectService.findProjectById(id).get());
     }
     @PostMapping("/addSkillstToProject")

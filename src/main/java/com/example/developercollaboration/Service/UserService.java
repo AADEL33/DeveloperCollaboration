@@ -1,6 +1,8 @@
 package com.example.developercollaboration.Service;
+import com.example.developercollaboration.DTOs.UserDto;
 import com.example.developercollaboration.Model.User;
 import com.example.developercollaboration.Repositories.UserRepository;
+import com.example.developercollaboration.mapper.EntityToDtoMapper;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +58,7 @@ public class UserService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
     }
 
-    public User saveUser(User user)throws Exception{
+    public UserDto saveUser(User user)throws Exception{
         if("".equals(user.getUsername())){
             throw new Exception("Email must not be empty");
         }
@@ -64,7 +66,7 @@ public class UserService implements UserDetailsService {
             throw new Exception("Email taken");
         } else{
             user.setPassword(passwordEncoder.encode(user.getPassword()));
-            return   userRepo.save(user);
+            return EntityToDtoMapper.UserToUserDto(userRepo.save(user)) ;
         }
 
     }
@@ -76,12 +78,12 @@ public class UserService implements UserDetailsService {
         userRepo.deleteByUsername(username);
     }
 
-    public User UpdateUsername(String username){
+    public UserDto UpdateUsername(String username){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         User user =userRepo.findByUsername((String) authentication.getPrincipal());
         user.setUsername(username);
-        return user;
+        return EntityToDtoMapper.UserToUserDto(user) ;
     }
 
     public void updateResetPasswordToken(String token, String email) throws UserPrincipalNotFoundException {

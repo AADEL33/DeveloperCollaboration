@@ -1,10 +1,12 @@
 package com.example.developercollaboration.Service;
 
+import com.example.developercollaboration.DTOs.ProjectDto;
 import com.example.developercollaboration.Model.Project;
 import com.example.developercollaboration.Model.Skill;
 import com.example.developercollaboration.Model.User;
 import com.example.developercollaboration.Repositories.ProjectRepository;
 import com.example.developercollaboration.Repositories.UserRepository;
+import com.example.developercollaboration.mapper.EntityToDtoMapper;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,10 +32,16 @@ public class ProjectService {
         projectRepository.save(project);
     }
 
-    public Optional<Project>  findProjectById(Long id) throws Exception {
+    public Optional<ProjectDto> findById(Long id) throws Exception {
+        if (!projectRepository.existsById(id)) throw new Exception("No project Found with id" + id);
+        return Optional.of(EntityToDtoMapper.ProjectToProjectDto(projectRepository.findProjectById(id).get()));
+    }
+    public Optional<Project> findProjectById(Long id) throws Exception {
         if (!projectRepository.existsById(id)) throw new Exception("No project Found with id" + id);
         return projectRepository.findProjectById(id);
     }
+
+
 
     public void deleteProjectById(Long id) throws Exception {
         if (!projectRepository.existsById(id)) throw new Exception("There is no project with this ID");
@@ -42,42 +50,42 @@ public class ProjectService {
         }
     }
 
-    public List<Project> findAllOpenProjects() throws Exception {
+    public List<ProjectDto> findAllOpenProjects() throws Exception {
         if (projectRepository.count() == 0) throw new Exception("No project found");
         else {
-            return projectRepository.findAllByIsOpenTrue();
+            return projectRepository.findAllByIsOpenTrue().stream().map(EntityToDtoMapper::ProjectToProjectDto).toList();
         }
 
     }
 
-    public List<Project> findAllClosedProjects() throws Exception {
+    public List<ProjectDto> findAllClosedProjects() throws Exception {
         if (projectRepository.count() == 0) throw new Exception("No project found");
         else {
-            return projectRepository.findAllByIsOpenFalse();
+            return projectRepository.findAllByIsOpenFalse().stream().map(EntityToDtoMapper::ProjectToProjectDto).toList();
         }
 
     }
 
-    public List<Project> findAllProjects() throws Exception {
+    public List<ProjectDto> findAllProjects() throws Exception {
         if (projectRepository.count() == 0) throw new Exception("No project found");
-        return projectRepository.findAll();
+        return projectRepository.findAll().stream().map(EntityToDtoMapper::ProjectToProjectDto).toList();
     }
 
 
-    public List<Project> findAllByRequiredSkillsContaining(ArrayList<Skill> skills) throws Exception {
+    public List<ProjectDto> findAllByRequiredSkillsContaining(ArrayList<Skill> skills) throws Exception {
         List<Project> projects = projectRepository.findAll();
         if (skillService.getSkills().containsAll(skills)) {
-            return projects.stream().filter(project -> project.getRequiredSkills().containsAll(skills)).toList();
+            return projects.stream().filter(project -> project.getRequiredSkills().containsAll(skills)).map(EntityToDtoMapper::ProjectToProjectDto).toList();
         } else {
             throw new Exception("skills not all found");
         }
     }
 
-    public List<Project> findByAtLeastOneSkill(ArrayList<Skill> skills) throws Exception {
+    public List<ProjectDto> findByAtLeastOneSkill(ArrayList<Skill> skills) throws Exception {
         List<Project> projects = projectRepository.findAll();
         if (skillService.getSkills().containsAll(skills)) {
 
-            return projects.stream().filter(project -> project.getRequiredSkills().stream().anyMatch(skills::contains)).toList();
+            return projects.stream().filter(project -> project.getRequiredSkills().stream().anyMatch(skills::contains)).map(EntityToDtoMapper::ProjectToProjectDto).toList();
 
         } else {
             throw new Exception("Some Skills are not found");
@@ -85,7 +93,7 @@ public class ProjectService {
 
     }
 
-    public Project assignUserToProject(Project project) throws Exception {
+    public ProjectDto assignUserToProject(Project project) throws Exception {
         User currentUser = userService.getCurrentUser();
         if (!project.getIsOpen()) {
             throw new Exception("Sorry you can not join this project, the limit number of contributors is already reached");
@@ -97,7 +105,7 @@ public class ProjectService {
             project.getContributors().add(currentUser);
             if (project.getContributors().size() == project.getMaxContributors()) project.setIsOpen(false);
             projectRepository.saveAndFlush(project);
-            return project;
+            return EntityToDtoMapper.ProjectToProjectDto(project) ;
         }
     }
 
