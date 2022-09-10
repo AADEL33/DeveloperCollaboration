@@ -1,6 +1,6 @@
 package com.example.developercollaboration.Service;
-
 import com.example.developercollaboration.DTOs.ProjectDto;
+import com.example.developercollaboration.Exceptions.ProjectExceptions.*;
 import com.example.developercollaboration.Model.Project;
 import com.example.developercollaboration.Model.Skill;
 import com.example.developercollaboration.Model.User;
@@ -10,7 +10,6 @@ import com.example.developercollaboration.mapper.EntityToDtoMapper;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,75 +31,75 @@ public class ProjectService {
         projectRepository.save(project);
     }
 
-    public Optional<ProjectDto> findById(Long id) throws Exception {
-        if (!projectRepository.existsById(id)) throw new Exception("No project Found with id" + id);
+    public Optional<ProjectDto> findById(Long id)  {
+        if (!projectRepository.existsById(id)) throw new ProjectNotFoundException();
         return Optional.of(EntityToDtoMapper.ProjectToProjectDto(projectRepository.findProjectById(id).get()));
     }
-    public Optional<Project> findProjectById(Long id) throws Exception {
-        if (!projectRepository.existsById(id)) throw new Exception("No project Found with id" + id);
+    public Optional<Project> findProjectById(Long id) {
+        if (!projectRepository.existsById(id)) throw new ProjectNotFoundException();
         return projectRepository.findProjectById(id);
     }
 
 
 
-    public void deleteProjectById(Long id) throws Exception {
-        if (!projectRepository.existsById(id)) throw new Exception("There is no project with this ID");
+    public void deleteProjectById(Long id) {
+        if (!projectRepository.existsById(id)) throw new ProjectNotFoundException();
         else {
             projectRepository.deleteById(id);
         }
     }
 
-    public List<ProjectDto> findAllOpenProjects() throws Exception {
-        if (projectRepository.count() == 0) throw new Exception("No project found");
+    public List<ProjectDto> findAllOpenProjects()  {
+        if (projectRepository.count() == 0) throw new  ProjectNotFoundException();
         else {
             return projectRepository.findAllByIsOpenTrue().stream().map(EntityToDtoMapper::ProjectToProjectDto).toList();
         }
 
     }
 
-    public List<ProjectDto> findAllClosedProjects() throws Exception {
-        if (projectRepository.count() == 0) throw new Exception("No project found");
+    public List<ProjectDto> findAllClosedProjects()  {
+        if (projectRepository.count() == 0) throw new  ProjectNotFoundException();
         else {
             return projectRepository.findAllByIsOpenFalse().stream().map(EntityToDtoMapper::ProjectToProjectDto).toList();
         }
 
     }
 
-    public List<ProjectDto> findAllProjects() throws Exception {
-        if (projectRepository.count() == 0) throw new Exception("No project found");
+    public List<ProjectDto> findAllProjects()  {
+        if (projectRepository.count() == 0) throw new  ProjectNotFoundException();
         return projectRepository.findAll().stream().map(EntityToDtoMapper::ProjectToProjectDto).toList();
     }
 
 
-    public List<ProjectDto> findAllByRequiredSkillsContaining(ArrayList<Skill> skills) throws Exception {
+    public List<ProjectDto> findAllByRequiredSkillsContaining(ArrayList<Skill> skills)  {
         List<Project> projects = projectRepository.findAll();
         if (skillService.getSkills().containsAll(skills)) {
             return projects.stream().filter(project -> project.getRequiredSkills().containsAll(skills)).map(EntityToDtoMapper::ProjectToProjectDto).toList();
         } else {
-            throw new Exception("skills not all found");
+            throw new NoProjectRequiringAllSkillsException();
         }
     }
 
-    public List<ProjectDto> findByAtLeastOneSkill(ArrayList<Skill> skills) throws Exception {
+    public List<ProjectDto> findByAtLeastOneSkill(ArrayList<Skill> skills){
         List<Project> projects = projectRepository.findAll();
         if (skillService.getSkills().containsAll(skills)) {
 
             return projects.stream().filter(project -> project.getRequiredSkills().stream().anyMatch(skills::contains)).map(EntityToDtoMapper::ProjectToProjectDto).toList();
 
         } else {
-            throw new Exception("Some Skills are not found");
+            throw new NoProjectRequiringAtLeastOneSkillException();
         }
 
     }
 
-    public ProjectDto assignUserToProject(Project project) throws Exception {
+    public ProjectDto assignUserToProject(Project project){
         User currentUser = userService.getCurrentUser();
         if (!project.getIsOpen()) {
-            throw new Exception("Sorry you can not join this project, the limit number of contributors is already reached");
+            throw new MaxContributorsReachedException();
         }
 
         if (project.getContributors().contains(userRepository.findByUsername(currentUser.getUsername())))
-            throw new Exception("you are already member");
+            throw new AlreadyMemberException();
         else {
             project.getContributors().add(currentUser);
             if (project.getContributors().size() == project.getMaxContributors()) project.setIsOpen(false);
@@ -109,7 +108,7 @@ public class ProjectService {
         }
     }
 
-    public void addSkillsToProject(Long projectId, List<String> skillIds) throws Exception {
+    public void addSkillsToProject(Long projectId, List<String> skillIds)  {
 
         ArrayList<Skill> skills = new ArrayList<>();
         skillIds.forEach(skillId -> {
@@ -123,11 +122,11 @@ public class ProjectService {
         project.get().getRequiredSkills().addAll(skills);
     }
 
-    public void retrieveUserFromProject(String username, Long projectId) throws Exception {
+    public void retrieveUserFromProject(String username, Long projectId) {
         User user = userRepository.findByUsername(username);
         Optional<Project> project = findProjectById(projectId);
         if (!project.get().getContributors().contains(user)) {
-            throw new Exception("The user" + user + " is not a member in " + project);
+            throw new UserNotMemberException();
         } else {
             project.get().getContributors().remove(user);
             project.get().setIsOpen(true);

@@ -1,5 +1,9 @@
 package com.example.developercollaboration.Service;
 import com.example.developercollaboration.DTOs.UserDto;
+import com.example.developercollaboration.Exceptions.UserExceptions.AlraedyHaveAccountException;
+import com.example.developercollaboration.Exceptions.UserExceptions.EmailNotValidException;
+import com.example.developercollaboration.Exceptions.UserExceptions.ResetPasswordFailedException;
+import com.example.developercollaboration.Exceptions.UserExceptions.UserNotFoundException;
 import com.example.developercollaboration.Model.User;
 import com.example.developercollaboration.Repositories.UserRepository;
 import com.example.developercollaboration.mapper.EntityToDtoMapper;
@@ -18,13 +22,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -40,6 +42,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender mailSender;
+    private final EmailValidator emailValidator;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -59,20 +62,20 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDto saveUser(User user)throws Exception{
-        if("".equals(user.getUsername())){
-            throw new Exception("Email must not be empty");
+        if(!emailValidator.isValidEmail(user.getUsername())){
+            throw new EmailNotValidException();
         }
         else if(userRepo.existsByUsername(user.getUsername())){
-            throw new Exception("Email taken");
+            throw new AlraedyHaveAccountException();
         } else{
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             return EntityToDtoMapper.UserToUserDto(userRepo.save(user)) ;
         }
 
     }
-    public void deleteUser(String username)throws Exception{
+    public void deleteUser(String username){
         if(!userRepo.existsByUsername(username)){
-            throw new Exception("user not found");
+            throw new UserNotFoundException();
 
         }
         userRepo.deleteByUsername(username);
@@ -86,13 +89,13 @@ public class UserService implements UserDetailsService {
         return EntityToDtoMapper.UserToUserDto(user) ;
     }
 
-    public void updateResetPasswordToken(String token, String email) throws UserPrincipalNotFoundException {
+    public void updateResetPasswordToken(String token, String email) {
         User user = userRepo.findByUsername(email);
         if(user!=null){
             user.setResetPasswordToken(token);
             userRepo.save(user);
         }else{
-            throw new UserPrincipalNotFoundException("could not find any user with email"+email);
+            throw new UserNotFoundException();
         }
     }
 
@@ -132,16 +135,16 @@ public class UserService implements UserDetailsService {
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userRepo.findByUsername(username);
     }
-    public void processResetPassword(HttpServletRequest request) throws IllegalAccessException {
+    public void processResetPassword(HttpServletRequest request) throws ResetPasswordFailedException {
         String token = request.getParameter("token");
         String password = request.getParameter("password");
         User user = getCurrentUser();
         if (!Objects.equals(user.getResetPasswordToken(), token)){
-            throw new IllegalAccessException("You are not allowed to perform this operation");
+            throw new ResetPasswordFailedException();
         }
         updatePassword(user,password);
     }
-    public void processForgotPassword(HttpServletRequest request) throws UserPrincipalNotFoundException, MessagingException, UnsupportedEncodingException {
+    public void processForgotPassword(HttpServletRequest request) throws  MessagingException, UnsupportedEncodingException {
         String email = request.getParameter("email");
         String token = RandomString.make(30);
         String resetPasswordLink = ServletUriComponentsBuilder.fromRequestUri(request).replacePath(null).build() + "/reset_password?token=" + token;

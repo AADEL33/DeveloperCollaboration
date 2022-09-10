@@ -2,8 +2,11 @@ package com.example.developercollaboration.Model;
 
 import com.example.developercollaboration.Enums.RolesEnum;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import java.util.*;
 
 
@@ -17,6 +20,7 @@ import java.util.*;
 @Setter
 public class User {
     @Id
+    @NotEmpty(message = "Email cannot be empty")
     private String username;
     @Column(
             nullable = false

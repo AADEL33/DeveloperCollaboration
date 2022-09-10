@@ -1,6 +1,7 @@
 package com.example.developercollaboration.Service;
-
 import com.example.developercollaboration.DTOs.CommentDto;
+import com.example.developercollaboration.Exceptions.CommentExceptions.CantDeleteCommentException;
+import com.example.developercollaboration.Exceptions.CommentExceptions.CommentNotFoundException;
 import com.example.developercollaboration.Model.Comment;
 import com.example.developercollaboration.Model.Project;
 import com.example.developercollaboration.Model.User;
@@ -24,7 +25,7 @@ public class CommentService {
     private final UserService userService;
 
 
-    public void addCommentToProject(String commentary, Long ProjectId) throws Exception {
+    public void addCommentToProject(String commentary, Long ProjectId){
 
         Optional<Project> project=projectRepository.findById(ProjectId);
         Comment comment=new Comment();
@@ -36,21 +37,18 @@ public class CommentService {
     }
 
     public void deleteCommentFromProject(Long CommentId,Long ProjectId) throws Exception {
-        if(!projectRepository.existsById(ProjectId)||!commentRepository.existsById(CommentId)){
-            throw new Exception("Project or comment not found");
-        }
         Optional<Project> project=projectRepository.findById(ProjectId);
         Optional<Comment> comment=commentRepository.findById(CommentId);
         if(!project.get().getComments().contains(comment.get()) || comment.get().getUser()!=userService.getCurrentUser()) {
-            throw new Exception("this project does not contains this comment or maybe you do not own this comment");
+            throw new CantDeleteCommentException();
         }
         project.get().getComments().remove(comment.get());
         commentRepository.deleteById(CommentId);
     }
 
-    public List<CommentDto> getMyCommentsOnProjects(User user) throws Exception {
+    public List<CommentDto> getMyCommentsOnProjects(User user)  {
         if(commentRepository.count()==0){
-            throw new Exception("No comment found");
+            throw new CommentNotFoundException();
         }
         return  commentRepository.findAllByUser(user);
     }
