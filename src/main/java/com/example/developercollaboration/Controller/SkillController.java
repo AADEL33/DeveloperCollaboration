@@ -25,7 +25,7 @@ public class SkillController {
     }
     @GetMapping("/{id}")
     public Optional<Skill> GetSkillByName(@PathVariable String id) throws Exception {
-        return skillService.getSkillbyName(id);
+        return skillService.getSkillByName(id);
     }
     @GetMapping("/all")
     public List<Skill> getAllSkills(){

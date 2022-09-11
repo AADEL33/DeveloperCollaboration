@@ -37,7 +37,7 @@ public class SkillService {
          return skillRepository.findAll();
     }
 
-    public Optional<Skill> getSkillbyName(String name){
+    public Optional<Skill> getSkillByName(String name){
         if(!skillRepository.existsById(name)){
             throw new SkillNotFoundException();
         }else{

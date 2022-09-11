@@ -29,7 +29,7 @@ public class CommentService {
 
         Optional<Project> project=projectRepository.findById(ProjectId);
         Comment comment=new Comment();
-        comment.setProject(project.get());
+        comment.setProject(project.orElseThrow());
         comment.setUser(userService.getCurrentUser());
         comment.setComment(commentary);
         commentRepository.save(comment);
@@ -39,7 +39,7 @@ public class CommentService {
     public void deleteCommentFromProject(Long CommentId,Long ProjectId) throws Exception {
         Optional<Project> project=projectRepository.findById(ProjectId);
         Optional<Comment> comment=commentRepository.findById(CommentId);
-        if(!project.get().getComments().contains(comment.get()) || comment.get().getUser()!=userService.getCurrentUser()) {
+        if(!project.orElseThrow().getComments().contains(comment.orElseThrow()) || comment.get().getUser()!=userService.getCurrentUser()) {
             throw new CantDeleteCommentException();
         }
         project.get().getComments().remove(comment.get());

@@ -33,7 +33,7 @@ public class ProjectService {
 
     public Optional<ProjectDto> findById(Long id)  {
         if (!projectRepository.existsById(id)) throw new ProjectNotFoundException();
-        return Optional.of(EntityToDtoMapper.ProjectToProjectDto(projectRepository.findProjectById(id).get()));
+        return Optional.of(EntityToDtoMapper.ProjectToProjectDto(projectRepository.findProjectById(id).orElseThrow()));
     }
     public Optional<Project> findProjectById(Long id) {
         if (!projectRepository.existsById(id)) throw new ProjectNotFoundException();
@@ -70,7 +70,6 @@ public class ProjectService {
         return projectRepository.findAll().stream().map(EntityToDtoMapper::ProjectToProjectDto).toList();
     }
 
-
     public List<ProjectDto> findAllByRequiredSkillsContaining(ArrayList<Skill> skills)  {
         List<Project> projects = projectRepository.findAll();
         if (skillService.getSkills().containsAll(skills)) {
@@ -94,12 +93,14 @@ public class ProjectService {
 
     public ProjectDto assignUserToProject(Project project){
         User currentUser = userService.getCurrentUser();
-        if (!project.getIsOpen()) {
+        if (project.getContributors().contains(userRepository.findByUsername(currentUser.getUsername()))){
+            throw new AlreadyMemberException();
+        }
+
+        else if (!project.getIsOpen()) {
             throw new MaxContributorsReachedException();
         }
 
-        if (project.getContributors().contains(userRepository.findByUsername(currentUser.getUsername())))
-            throw new AlreadyMemberException();
         else {
             project.getContributors().add(currentUser);
             if (project.getContributors().size() == project.getMaxContributors()) project.setIsOpen(false);
@@ -109,23 +110,16 @@ public class ProjectService {
     }
 
     public void addSkillsToProject(Long projectId, List<String> skillIds)  {
-
         ArrayList<Skill> skills = new ArrayList<>();
-        skillIds.forEach(skillId -> {
-            try {
-                skills.add(skillService.getSkillbyName(skillId).get());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        skillIds.forEach(skillId -> skills.add(skillService.getSkillByName(skillId).orElseThrow()));
         Optional<Project> project = findProjectById(projectId);
-        project.get().getRequiredSkills().addAll(skills);
+        project.orElseThrow().getRequiredSkills().addAll(skills);
     }
 
     public void retrieveUserFromProject(String username, Long projectId) {
         User user = userRepository.findByUsername(username);
         Optional<Project> project = findProjectById(projectId);
-        if (!project.get().getContributors().contains(user)) {
+        if (!project.orElseThrow().getContributors().contains(user)) {
             throw new UserNotMemberException();
         } else {
             project.get().getContributors().remove(user);
